@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Attendance — Login</title>
+  <meta name="description" content="Automated Student Attendance Monitoring & Analytics System for Colleges" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="auth-page">
+
+  <!-- Toast notifications -->
+  <div id="toast-container"></div>
+
+  <div class="auth-card">
+    <!-- Logo -->
+    <div class="auth-logo">
+      <div class="logo-icon-lg">🎓</div>
+      <h1>Smart Attendance</h1>
+      <p>Automated Monitoring & Analytics System</p>
+    </div>
+
+    <!-- Login / Register Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- Alert box -->
+    <div id="auth-alert" style="display:none;"></div>
+
+    <!-- ── Login Form ────────────────────────────────────────────── -->
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="login-email" class="form-control" placeholder="you@college.edu" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="login-password" class="form-control" placeholder="Enter password" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;" id="login-btn">
+        🔐 Login
+      </button>
+      <p style="text-align:center; margin-top:16px; font-size:0.8rem; color:var(--text-muted);">
+        Demo: <strong>admin@attendance.com</strong> / admin123
+      </p>
+    </form>
+
+    <!-- ── Register Form ─────────────────────────────────────────── -->
+    <form id="register-form" style="display:none;">
+      <!-- Role Selector -->
+      <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:10px;">Select your role:</p>
+      <div class="role-selector" id="role-selector">
+        <button type="button" class="role-btn active" data-role="student" onclick="selectRole('student')">
+          <span class="role-icon">🧑‍🎓</span>Student
+        </button>
+        <button type="button" class="role-btn" data-role="teacher" onclick="selectRole('teacher')">
+          <span class="role-icon">👩‍🏫</span>Teacher
+        </button>
+        <button type="button" class="role-btn" data-role="admin" onclick="selectRole('admin')">
+          <span class="role-icon">🔴</span>Admin
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" id="reg-name" class="form-control" placeholder="Your full name" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="reg-email" class="form-control" placeholder="you@college.edu" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password (min 6 chars)</label>
+        <input type="password" id="reg-password" class="form-control" placeholder="Strong password" required minlength="6" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Department</label>
+        <input type="text" id="reg-department" class="form-control" placeholder="e.g. Computer Science" />
+      </div>
+
+      <!-- Student-only fields -->
+      <div id="student-fields">
+        <div class="form-group">
+          <label class="form-label">Roll Number</label>
+          <input type="text" id="reg-roll" class="form-control" placeholder="e.g. CS2021001" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Semester</label>
+          <select id="reg-semester" class="form-control">
+            <option value="">Select semester</option>
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+            <option value="3">Semester 3</option>
+            <option value="4">Semester 4</option>
+            <option value="5">Semester 5</option>
+            <option value="6">Semester 6</option>
+            <option value="7">Semester 7</option>
+            <option value="8">Semester 8</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Teacher-only fields -->
+      <div id="teacher-fields" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">Employee ID</label>
+          <input type="text" id="reg-empid" class="form-control" placeholder="e.g. EMP001" />
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;" id="register-btn">
+        ✨ Create Account
+      </button>
+    </form>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

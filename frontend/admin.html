@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — Smart Attendance</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="#">
+    <div class="logo-icon">🎓</div>
+    Smart Attendance
+  </a>
+  <div class="navbar-user">
+    <div class="user-badge">🔴 <span id="user-name">Admin</span></div>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-wrapper container" style="padding-top:32px; padding-bottom:48px;">
+  <div class="page-header">
+    <h1>🔴 Admin Control Panel</h1>
+    <p>Complete system overview and management</p>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon">🧑‍🎓</div>
+      <div class="stat-value" id="stat-students">—</div>
+      <div class="stat-label">Total Students</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👩‍🏫</div>
+      <div class="stat-value" id="stat-teachers">—</div>
+      <div class="stat-label">Total Teachers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div class="stat-value" id="stat-classes">—</div>
+      <div class="stat-label">Active Classes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📡</div>
+      <div class="stat-value" id="stat-sessions">—</div>
+      <div class="stat-label">Total Sessions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value" id="stat-rate">—</div>
+      <div class="stat-label">Overall Attendance Rate</div>
+      <span class="stat-badge badge-green" id="rate-badge"></span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('overview')">📊 Analytics</button>
+    <button class="tab-btn" onclick="switchTab('users'); loadUsers()">👥 Users</button>
+    <button class="tab-btn" onclick="switchTab('classes-tab'); loadClasses()">📚 Classes</button>
+    <button class="tab-btn" onclick="switchTab('low-att'); loadLowAttendance()">⚠️ Low Attendance</button>
+  </div>
+
+  <!-- Analytics Tab -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="dashboard-grid">
+      <div class="col-6">
+        <div class="card">
+          <div class="card-header"><h3>📅 Daily Attendance (Last 7 Days)</h3></div>
+          <div class="chart-wrap"><canvas id="dailyChart"></canvas></div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="card">
+          <div class="card-header"><h3>📚 Attendance by Subject</h3></div>
+          <div class="chart-wrap"><canvas id="subjectChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Tab -->
+  <div class="tab-content" id="tab-users">
+    <div class="section-header">
+      <h2 class="section-title">All Users</h2>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline btn-sm" onclick="filterUsers('')">All</button>
+        <button class="btn btn-outline btn-sm" onclick="filterUsers('student')">Students</button>
+        <button class="btn btn-outline btn-sm" onclick="filterUsers('teacher')">Teachers</button>
+      </div>
+    </div>
+    <div class="card">
+      <div id="users-loading" class="spinner"></div>
+      <div id="users-table-container" style="display:none;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Info</th><th>Joined</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="users-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Classes Tab -->
+  <div class="tab-content" id="tab-classes-tab">
+    <div class="section-header">
+      <h2 class="section-title">All Classes</h2>
+    </div>
+    <div class="card">
+      <div id="all-classes-loading" class="spinner"></div>
+      <div id="all-classes-container" style="display:none;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Subject</th><th>Code</th><th>Teacher</th><th>Department</th><th>Semester</th><th>Students</th><th>Sessions</th></tr></thead>
+            <tbody id="all-classes-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Low Attendance Tab -->
+  <div class="tab-content" id="tab-low-att">
+    <div class="section-header">
+      <h2 class="section-title">⚠️ Students Below Threshold</h2>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <label style="font-size:0.8rem; color:var(--text-secondary);">Threshold:</label>
+        <select id="threshold-select" class="form-control" style="width:100px;" onchange="loadLowAttendance()">
+          <option value="75">75%</option>
+          <option value="60">60%</option>
+          <option value="85">85%</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div id="low-loading" class="spinner"></div>
+      <div id="low-container" style="display:none;">
+        <div id="low-count-info" class="alert alert-warning" style="margin-bottom:16px;"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Student</th><th>Roll No.</th><th>Subject</th><th>Present</th><th>Total</th><th>Attendance %</th></tr></thead>
+            <tbody id="low-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

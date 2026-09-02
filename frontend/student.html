@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard — Smart Attendance</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- html5-qrcode for camera-based scanning -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- ── Navbar ── -->
+<nav class="navbar">
+  <a class="navbar-brand" href="#">
+    <div class="logo-icon">🎓</div>
+    Smart Attendance
+  </a>
+  <div class="navbar-user">
+    <div class="user-badge">🧑‍🎓 <span id="user-name">Student</span></div>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-wrapper container" style="padding-top:32px; padding-bottom:48px;">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h1>📊 My Dashboard</h1>
+    <p id="student-info">Loading your profile…</p>
+  </div>
+
+  <!-- Summary stat cards -->
+  <div class="stat-grid" id="stat-cards">
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div class="stat-value" id="stat-classes">—</div>
+      <div class="stat-label">Enrolled Subjects</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📈</div>
+      <div class="stat-value" id="stat-avg">—</div>
+      <div class="stat-label">Average Attendance %</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-value" id="stat-low">—</div>
+      <div class="stat-label">Low Attendance Subjects</div>
+      <span class="stat-badge badge-red" id="low-badge" style="display:none;">ALERT</span>
+    </div>
+  </div>
+
+  <!-- Low attendance warning -->
+  <div id="low-alert" class="alert alert-warning" style="display:none;">
+    ⚠️ You have subjects with attendance below 75%. Please attend classes regularly to avoid being detained.
+  </div>
+
+  <div class="dashboard-grid">
+    <!-- Attendance by Subject Chart -->
+    <div class="col-8">
+      <div class="card">
+        <div class="card-header">
+          <h3>📊 Attendance by Subject</h3>
+        </div>
+        <div class="chart-wrap"><canvas id="subjectChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- QR Scanner Panel -->
+    <div class="col-4">
+      <div class="card">
+        <div class="card-header" style="display:flex; align-items:center; justify-content:space-between;">
+          <h3>📷 Scan QR Code</h3>
+          <button class="btn btn-primary btn-sm" id="scan-btn" onclick="toggleScanner()">Start Scanner</button>
+        </div>
+        <div id="scan-result" style="display:none;"></div>
+        <div id="qr-reader" style="width:100%;"></div>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:12px; text-align:center;">
+          Allow camera access and point at the QR code displayed by your teacher.
+        </p>
+      </div>
+    </div>
+
+    <!-- Subject Cards with attendance -->
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header"><h3>📋 Subject-wise Attendance</h3></div>
+        <div id="subjects-loading" class="spinner"></div>
+        <div id="subjects-list" style="display:none;">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Code</th>
+                  <th>Teacher</th>
+                  <th>Present</th>
+                  <th>Total</th>
+                  <th>Percentage</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="subjects-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Attendance History Modal -->
+<div class="modal-overlay" id="history-modal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header">
+      <h2 class="modal-title" id="history-title">Attendance History</h2>
+      <button class="modal-close" onclick="closeModal('history-modal')">✕</button>
+    </div>
+    <div id="history-content"></div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/student.js"></script>
+</body>
+</html>

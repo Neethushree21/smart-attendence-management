@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Dashboard — Smart Attendance</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <a class="navbar-brand" href="#">
+    <div class="logo-icon">🎓</div>
+    Smart Attendance
+  </a>
+  <div class="navbar-user">
+    <div class="user-badge">👩‍🏫 <span id="user-name">Teacher</span></div>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-wrapper container" style="padding-top:32px; padding-bottom:48px;">
+
+  <div class="page-header">
+    <h1>👩‍🏫 Teacher Dashboard</h1>
+    <p id="teacher-info">Loading…</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('classes')">📚 My Classes</button>
+    <button class="tab-btn" onclick="switchTab('sessions')">📡 Sessions & QR</button>
+    <button class="tab-btn" onclick="switchTab('attendance')">📋 Attendance Report</button>
+    <button class="tab-btn" onclick="switchTab('students')">🧑‍🎓 Add Students</button>
+  </div>
+
+  <!-- ── Tab: Classes ── -->
+  <div class="tab-content active" id="tab-classes">
+    <div class="section-header">
+      <h2 class="section-title">My Classes</h2>
+      <button class="btn btn-primary" onclick="openModal('create-class-modal')">+ New Class</button>
+    </div>
+    <div id="classes-loading" class="spinner"></div>
+    <div id="classes-grid" style="display:none; display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px;"></div>
+  </div>
+
+  <!-- ── Tab: Sessions & QR ── -->
+  <div class="tab-content" id="tab-sessions">
+    <div class="section-header">
+      <h2 class="section-title">Active & Past Sessions</h2>
+      <button class="btn btn-primary" onclick="openModal('generate-qr-modal')">📡 Start New Session</button>
+    </div>
+    <div id="sessions-loading" class="spinner"></div>
+    <div id="sessions-list" style="display:none;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Class</th><th>Session Title</th><th>Started</th><th>Expires</th><th>Students Attended</th><th>Status</th></tr>
+          </thead>
+          <tbody id="sessions-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tab: Attendance Report ── -->
+  <div class="tab-content" id="tab-attendance">
+    <div class="section-header">
+      <h2 class="section-title">Attendance Report</h2>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Select Class to view report</label>
+        <select id="report-class-select" class="form-control" onchange="loadReport()">
+          <option value="">-- Select a class --</option>
+        </select>
+      </div>
+    </div>
+    <div id="report-loading" style="display:none;" class="spinner"></div>
+    <div id="report-container" style="display:none;">
+      <div class="section-header">
+        <span id="report-title"></span>
+        <button class="btn btn-success btn-sm" onclick="downloadCSV()">⬇️ Download CSV</button>
+      </div>
+      <div class="chart-wrap" style="height:240px; margin-bottom:24px;">
+        <canvas id="reportChart"></canvas>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Student</th><th>Roll No.</th><th>Present</th><th>Total</th><th>Percentage</th><th>Status</th></tr></thead>
+            <tbody id="report-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tab: Add Students ── -->
+  <div class="tab-content" id="tab-students">
+    <div class="section-header">
+      <h2 class="section-title">Enroll Students in a Class</h2>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="form-group">
+        <label class="form-label">Select Class</label>
+        <select id="enroll-class-select" class="form-control"></select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-header" style="margin-bottom:16px;">
+        <span style="font-size:0.85rem; color:var(--text-secondary);">Select students to enroll:</span>
+        <button class="btn btn-primary btn-sm" onclick="enrollStudents()">✅ Enroll Selected</button>
+      </div>
+      <div id="students-loading" class="spinner"></div>
+      <div id="students-grid" style="display:none; display:grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap:12px;"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Create Class -->
+<div class="modal-overlay" id="create-class-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">📚 Create New Class</h2>
+      <button class="modal-close" onclick="closeModal('create-class-modal')">✕</button>
+    </div>
+    <form onsubmit="createClass(event)">
+      <div class="form-group">
+        <label class="form-label">Subject Name</label>
+        <input type="text" id="cls-name" class="form-control" placeholder="e.g. Data Structures" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject Code</label>
+        <input type="text" id="cls-code" class="form-control" placeholder="e.g. CS301" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Department</label>
+        <input type="text" id="cls-dept" class="form-control" placeholder="e.g. Computer Science" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Semester</label>
+        <select id="cls-sem" class="form-control">
+          <option value="">Select</option>
+          <option value="1">Semester 1</option><option value="2">Semester 2</option>
+          <option value="3">Semester 3</option><option value="4">Semester 4</option>
+          <option value="5">Semester 5</option><option value="6">Semester 6</option>
+          <option value="7">Semester 7</option><option value="8">Semester 8</option>
+        </select>
+      </div>
+      <div id="class-form-alert" style="display:none;"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Create Class</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Generate QR -->
+<div class="modal-overlay" id="generate-qr-modal">
+  <div class="modal" style="text-align:center;">
+    <div class="modal-header">
+      <h2 class="modal-title">📡 Start Session & Generate QR</h2>
+      <button class="modal-close" onclick="closeModal('generate-qr-modal'); stopTimer()">✕</button>
+    </div>
+    <div id="qr-form-section">
+      <div class="form-group" style="text-align:left;">
+        <label class="form-label">Select Class</label>
+        <select id="qr-class-select" class="form-control"></select>
+      </div>
+      <div class="form-group" style="text-align:left;">
+        <label class="form-label">Session Title (optional)</label>
+        <input type="text" id="qr-session-title" class="form-control" placeholder="e.g. Lecture 5" />
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="generateQR()" style="width:100%;">🚀 Generate QR Code</button>
+    </div>
+    <div id="qr-display-section" style="display:none;">
+      <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:8px;">Show this QR code to your students:</p>
+      <div class="qr-container"><img id="qr-image" alt="QR Code" /></div>
+      <div class="qr-timer" id="qr-countdown">05:00</div>
+      <p style="font-size:0.78rem; color:var(--text-muted);">QR expires after 5 minutes. Students scan to mark attendance.</p>
+      <div id="attendance-live" class="alert alert-info" style="margin-top:12px;">👥 Students marked: <strong id="live-count">0</strong></div>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('generate-qr-modal'); stopTimer()" style="margin-top:12px;">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/teacher.js"></script>
+</body>
+</html>

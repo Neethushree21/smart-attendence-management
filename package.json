@@ -1,0 +1,30 @@
+{
+  "name": "smartattendencemanagement",
+  "version": "1.0.0",
+  "description": "A complete full-stack web application for managing college student attendance using QR codes, JWT authentication, and real-time analytics.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon backend/server.js",
+    "start": "node backend/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.6",
+    "csv-writer": "^1.6.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "express-validator": "^7.3.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^7.8.12",
+    "qrcode": "^1.5.4",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
